@@ -1044,7 +1044,8 @@ If STATUS-DATUM is already in DATA-VAR, return nil. If not, return t."
   (mapcar #'twittering-status-to-status-datum
 	  ;; quirk to treat difference between xml.el in Emacs21 and Emacs22
 	  ;; On Emacs22, there may be blank strings
-	  (let ((ret nil) (statuses (reverse (cddr (car xmltree)))))
+	  (let ((ret nil)
+		(statuses (reverse (cddr (car xmltree)))))
 	    (while statuses
 	      (if (consp (car statuses))
 		  (setq ret (cons (car statuses) ret)))
@@ -1124,9 +1125,11 @@ If STATUS-DATUM is already in DATA-VAR, return nil. If not, return t."
   (when (and (null init-str)
 	     twittering-current-hashtag)
     (setq init-str (format " #%s " twittering-current-hashtag)))
-  (let ((status init-str) (not-posted-p t) (map minibuffer-local-map))
+  (let ((status init-str)
+	(not-posted-p t)
+	(map minibuffer-local-map))
+    (define-key map (kbd "<f4>") 'twittering-tinyurl-replace-at-point)
     (while not-posted-p
-      (define-key map (kbd "<f4>") 'twittering-tinyurl-replace-at-point)
       (setq status (read-from-minibuffer "status: " status map nil 'twittering-tweet-history nil t))
       (while (< 140 (length status))
 	(setq status (read-from-minibuffer (format "(%d): "
@@ -1151,7 +1154,6 @@ If STATUS-DATUM is already in DATA-VAR, return nil. If not, return t."
 			t nil
 			'twittering-http-get-list-index-sentinel))
 
-
 (defun twittering-manage-friendships (method username)
   (twittering-http-post "twitter.com"
 			(concat "friendships/" method)
@@ -1162,45 +1164,6 @@ If STATUS-DATUM is already in DATA-VAR, return nil. If not, return t."
   (twittering-http-post "twitter.com"
 			(concat "favorites/" method "/" id)
 			`(("source" . "twmode"))))
-
-(defun twittering-tinyurl-get (longurl)
-  "Tinyfy LONGURL"
-  (with-temp-buffer
-	(mm-url-insert (concat tinyurl-service-url longurl))
-	(buffer-substring (point-min) (point-at-eol))))
-
-(defun twittering-tinyurl-replace-at-point ()
-  "Replace the url at point with a tiny version."
-  (interactive)
-  (let* ((url-bounds (bounds-of-thing-at-point 'url))
-		 (url (thing-at-point 'url))
-		 (newurl (twittering-tinyurl-get url)))
-	(save-restriction
-	  (narrow-to-region (car url-bounds) (cdr url-bounds))
-	  (delete-region (point-min) (point-max))
-	  (insert newurl))
-	newurl))
-
-;;;
-;;; Commands
-;;;
-
-(defun twittering-start (&optional action)
-  (interactive)
-  (if (null action)
-      (setq action #'twittering-current-timeline-noninteractive))
-  (if twittering-timer
-      nil
-    (setq twittering-timer
-	  (run-at-time "0 sec"
-		       twittering-timer-interval
-		       #'twittering-timer-action action))))
-
-(defun twittering-stop ()
-  (interactive)
-  (when twittering-timer
-    (cancel-timer twittering-timer)
-    (setq twittering-timer nil)))
 
 (defun twittering-get-twits (host method &optional noninteractive id)
   (unless (string= (twittering-last-method) method)
@@ -1256,6 +1219,45 @@ If STATUS-DATUM is already in DATA-VAR, return nil. If not, return t."
 	       (save-excursion
 		 (set-buffer (twittering-wget-buffer))
 		 )))))))
+
+(defun twittering-tinyurl-get (longurl)
+  "Tinyfy LONGURL"
+  (with-temp-buffer
+	(mm-url-insert (concat tinyurl-service-url longurl))
+	(buffer-substring (point-min) (point-at-eol))))
+
+(defun twittering-tinyurl-replace-at-point ()
+  "Replace the url at point with a tiny version."
+  (interactive)
+  (let* ((url-bounds (bounds-of-thing-at-point 'url))
+		 (url (thing-at-point 'url))
+		 (newurl (twittering-tinyurl-get url)))
+	(save-restriction
+	  (narrow-to-region (car url-bounds) (cdr url-bounds))
+	  (delete-region (point-min) (point-max))
+	  (insert newurl))
+	newurl))
+
+;;;
+;;; Commands
+;;;
+
+(defun twittering-start (&optional action)
+  (interactive)
+  (if (null action)
+      (setq action #'twittering-current-timeline-noninteractive))
+  (if twittering-timer
+      nil
+    (setq twittering-timer
+	  (run-at-time "0 sec"
+		       twittering-timer-interval
+		       #'twittering-timer-action action))))
+
+(defun twittering-stop ()
+  (interactive)
+  (when twittering-timer
+    (cancel-timer twittering-timer)
+    (setq twittering-timer nil)))
 
 (defun twittering-friends-timeline ()
   (interactive)
