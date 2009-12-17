@@ -1173,10 +1173,14 @@ XML tree as list. `buffer' may be a buffer or the name of an existing buffer. "
   (if (stringp buffer) (setq buffer (get-buffer buffer)))
   (save-excursion
     (set-buffer buffer)
-    (let ((content (buffer-string)))
-	(xml-parse-region (+ (string-match "\r?\n\r?\n" content)
-			     (length (match-string 0 content)))
-			  (point-max)))
+    (goto-char (point-min))
+    (save-match-data
+      (if (search-forward-regexp "\r?\n\r?\n" nil t)
+	  (condition-case get-error
+              (xml-parse-region (point) (point-max))
+	    (error (message "Failure: %s" get-error)
+		   nil))
+	nil))
       ))
 
 (defun twittering-cache-status-datum (status-datum &optional data-var)

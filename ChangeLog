@@ -132,6 +132,11 @@
 	(twittering-http-post-default-sentinel): use the same argument
 	format of http-get-default-sentinel
 
+2009-12-16  Satoshi Yatagawa  <yata_github@y.hauN.org>
+
+	* twittering-mode.el (twittering-get-response-body): Rewrite to
+	simplify implementation, as suggested by hayamiz.
+
 2009-12-16  Yuto Hayamizu  <y.hayamizu@gmail.com>
 
 	* twittering-mode.el (twittering-tinyurl-replace-at-point):
