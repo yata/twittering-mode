@@ -560,7 +560,8 @@ Otherwise, they are retrieved by `url-retrieve'.")
 
 (defun twittering-update-mode-line ()
   "Update mode line"
-  (let (enabled-options)
+  (let ((enabled-options nil)
+	(timeline-spec (twittering-get-timeline-spec)))
     (when twittering-jojo-mode
       (push "jojo" enabled-options))
     (when twittering-icon-mode
@@ -572,7 +573,7 @@ Otherwise, they are retrieved by `url-retrieve'.")
     (when twittering-use-ssl
       (push "ssl" enabled-options))
     (setq mode-name
-	  (concat twittering-mode-string
+	  (concat twittering-mode-string ":" timeline-spec
 		  (if enabled-options
 		      (concat "["
 			      (mapconcat 'identity enabled-options ",")
@@ -921,6 +922,7 @@ Available keywords:
   (with-current-buffer (twittering-buffer)
     (let ((point (point))
 	  (end (point-max)))
+      (twittering-update-mode-line)
       (setq buffer-read-only nil)
       (erase-buffer)
       (mapc (lambda (status)
