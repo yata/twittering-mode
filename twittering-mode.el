@@ -1579,6 +1579,14 @@ If STATUS-DATUM is already in DATA-VAR, return nil. If not, return t."
       (twittering-retrieve-image twittering-image-stack)
     ))
 
+(defun twittering-get-twits-with-timeline-spec
+  (timeline-spec &optional noninteractive id)
+  (let ((pair (twittering-get-host-method-from-timeline-spec timeline-spec)))
+    (when pair
+      (let ((host (car pair))
+	    (method (cadr pair)))
+	(twittering-get-twits host method noninteractive id)))))
+
 (defun twittering-retrieve-image (images)
   (if twittering-use-wget
       (twittering-retrieve-image-with-wget images)
@@ -1937,9 +1945,10 @@ return value of (funcall TO the-following-string the-match-data).
 (defun twittering-read-timeline-spec-with-completion
   (prompt initial)
   (let* ((dummy-hist
-	  (append (twittering-make-list-from-assoc
-		   'user-screen-name twittering-timeline-data)
-		  twittering-timeline-history))
+	  (delete-dups
+	   (append twittering-timeline-history
+		   (twittering-make-list-from-assoc
+		    'user-screen-name twittering-timeline-data))))
 	 (spec (completing-read prompt dummy-hist
 				nil nil initial 'dummy-hist)))
     (cond
