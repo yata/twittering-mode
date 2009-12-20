@@ -197,6 +197,47 @@ SSL connections use 'curl' command as a backend.")
        (setq twittering-last-timeline-retrieved
 	     `("twitter.com" ,twittering-last-timeline-retrieved))))
 
+(defun twittering-get-timeline-spec(&optional host method)
+  (let ((host (or host (twittering-last-host)))
+	(method (or method (twittering-last-method))))
+    (cond
+     ((or (not (stringp host)) (not (stringp method))) nil)
+     ((string= "twitter.com" host)
+      (cond
+       ((string= "statuses/friends_timeline" method) "~")
+       ((string= "statuses/replies" method) "@")
+       ((string= "statuses/public_timeline" method) "-")
+       ((string= "statuses/user_timeline" method) (twittering-get-username))
+       ((string-match "^statuses/user_timeline/\\(.+\\)$" method)
+	(match-string-no-properties 1 method))
+       (t nil)))
+     ((string= "api.twitter.com" host)
+      (cond
+       ((string-match "^1/\\([^/]+\\)/lists/\\([^/]+\\)/statuses" method)
+	(let ((username (match-string-no-properties 1 method))
+	      (listname (match-string-no-properties 2 method)))
+	  (concat username "/" listname)))
+       (t nil)))
+     (t nil))))
+
+(defun twittering-get-host-method-from-timeline-spec(timeline-spec)
+  (cond
+   ((not (stringp timeline-spec)) nil)
+   ((string= "" timeline-spec) nil)
+   ((string-match "^~$" timeline-spec)
+    '("twitter.com" "statuses/friends_timeline"))
+   ((string-match "^-$" timeline-spec)
+    '("twitter.com" "statuses/public_timeline"))
+   ((string-match "^@$" timeline-spec)
+    '("twitter.com" "statuses/replies"))
+   ((string-match "^\\([^/]+\\)/\\([^/]+\\)$" timeline-spec)
+    (let ((username (match-string 1 timeline-spec))
+	  (list-name (match-string 2 timeline-spec)))
+      `("api.twitter.com"
+	,(concat "1/" username "/lists/" list-name "/statuses" ))))
+   (t
+    `("twitter.com" ,(concat "statuses/user_timeline/" timeline-spec)))))
+
 (defun assocref (item alist)
   (cdr (assoc item alist)))
 (defmacro list-push (value listvar)
