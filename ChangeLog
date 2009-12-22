@@ -1,3 +1,8 @@
+2009-12-22  Satoshi Yatagawa  <yata_github@y.hauN.org>
+
+	* twittering-mode.el (twittering-get-host-method-from-timeline-spec)
+	(twittering-get-timeline-spec): Add more timeline specification.
+
 2009-12-22  Yuto Hayamizu  <y.hayamizu@gmail.com>
 
 	* twittering-mode.el (twittering-ucs-to-char): turned into
