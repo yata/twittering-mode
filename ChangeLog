@@ -3,6 +3,9 @@
 	* twittering-mode.el (twittering-get-host-method-from-timeline-spec)
 	(twittering-get-timeline-spec): Add more timeline specification.
 
+	* test/test-twittering-mode.el (timeline-spec): add more tests for
+	timeline specification.
+
 2009-12-22  Yuto Hayamizu  <y.hayamizu@gmail.com>
 
 	* twittering-mode.el (twittering-ucs-to-char): turned into
